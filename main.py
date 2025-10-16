@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    level=logging.WARNING
 )
 logger = logging.getLogger(__name__)
 
@@ -60,8 +60,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    logger.info(f"Received message from {user.id} ({user.username}): {update.message.text}")
-    await update.message.reply_text(update.message.text)
+    logger.warning(f"Received message from {user.id} ({user.username}): {update.message.text}")
+    # await update.message.reply_text(update.message.text)
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -92,8 +92,8 @@ async def notify_new_vacancies_task(context):
         # Fetch all vacancies
         json_data = api.call_get_vacancies_api(offset=0, limit=10000)
         vacancies = json_data.get("vacancies", [])
-        logger.info(f"Total number of received vacancies: {len(vacancies)}")
-        logger.info(f"Total number of vacancies from API: {json_data.get('count', 'unknown')}")
+        logger.warning(f"Total number of received vacancies: {len(vacancies)}")
+        logger.warning(f"Total number of vacancies from API: {json_data.get('count', 'unknown')}")
 
         # Read known IDs
         try:
@@ -125,9 +125,9 @@ async def notify_new_vacancies_task(context):
                     vid = v.get("id")
                     if vid is not None:
                         f.write(str(vid) + "\n")
-            logger.info(f"Sent {len(new_vacancies)} new vacancies to {len(user_ids)} users.")
+            logger.warning(f"Sent {len(new_vacancies)} new vacancies to {len(user_ids)} users.")
         else:
-            logger.info("No new vacancies found.")
+            logger.warning("No new vacancies found.")
     except Exception as e:
         logger.error(f"Error in notify_new_vacancies_task: {e}")
 
@@ -143,7 +143,7 @@ def main():
     app.add_handler(CommandHandler("unsubscribe", unsubscribe))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
-    logger.info("Bot started...")
+    logger.warning("Bot started...")
     # Schedule the job to run every hour using JobQueue
     app.job_queue.run_repeating(notify_new_vacancies_task, interval=3600, first=10)
     app.run_polling()
