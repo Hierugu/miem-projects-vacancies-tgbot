@@ -68,6 +68,7 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Save the user_id to users.txt file
     with open("users.txt", "a") as f:
         f.write(f"{user_id}\n")
+    logger.warning(f"User {user_id} subscribed.")
     await update.message.reply_text("Вы подписались на обновления о новых вакансиях!")
 
 async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -83,6 +84,7 @@ async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
             with open("users.txt", "w") as f:
                 for u in users:
                     f.write(f"{u}\n")
+        logger.warning(f"User {user_id} unsubscribed.")
         await update.message.reply_text("Вы отписались от обновлений о вакансиях.")
     except FileNotFoundError:
         await update.message.reply_text("Внутренняя ошибка: база пользователей не найдена.")
