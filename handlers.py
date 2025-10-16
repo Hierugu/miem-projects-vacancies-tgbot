@@ -81,3 +81,8 @@ async def random(update: Update, context: ContextTypes.DEFAULT_TYPE):
     vacancy = rand.choice(vacancies)
     msg = messages.new_vacancy_message(vacancy)
     await update.message.reply_text(msg, parse_mode="MarkdownV2", disable_web_page_preview=True)
+
+async def filter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    logger.warning(f"User {user.id} ({user.username}) called /filter")
+    await update.message.reply_text("Функция фильтрации пока не реализована.")

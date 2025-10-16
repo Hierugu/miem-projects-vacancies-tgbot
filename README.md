@@ -26,6 +26,7 @@ subscribe - Subscribe to new vacancies updates
 unsubscribe - Unsubscribe from vacancies updates
 statistics - Show statistics about active vacancies
 random - Get a random vacancy
+filter - Set filters for vacancies
 ```
 
 
