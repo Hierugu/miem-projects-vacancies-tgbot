@@ -1,4 +1,4 @@
-*{role}*
+*{role}* {projectType} {projectTags}
 *[\#{pid}](https://cabinet.miem.hse.ru/project/{pid})* {project}
 *Руководитель:* {manager}
 *Требования:*

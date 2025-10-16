@@ -1,5 +1,22 @@
 import os
 
+projectTypeEmojis = {
+    "methodical": "📚",
+    "program-hardware": "⚙️",
+    "program": "🖥️",
+    "nir": "⚛️",
+}
+
+projectTagsEmojis = {
+    "Оплачиваемый": "💰",
+    "Стартап": "🚀",
+    "От компании": "🏢",
+    "Проект-ВКР": "🎓",
+    "ТехноШоу": "🤖",
+}
+
+
+
 def escape_markdown_v2(text):
     if not isinstance(text, str):
         return text
@@ -7,7 +24,7 @@ def escape_markdown_v2(text):
     return ''.join(['\\' + c if c in escape_chars else c for c in text])
 
 def new_vacancy_message(vacancy):
-    values = {
+    values = { # TODO: add project type as emoji - ⚙️, 🖥️, 📚, ⚛️, 💼 | 🏢, 💰
         "id": vacancy.get('id', 'ERR'),
         "role": vacancy.get('role', 'ERR'),
         "description": vacancy.get('description', 'ERR').strip(),
@@ -16,6 +33,8 @@ def new_vacancy_message(vacancy):
         "developedSkills": '\n'.join(["• " + s for s in vacancy.get('developedSkills', ['ERR'])]),
         "project": vacancy.get('projectName', 'ERR'),
         "pid": vacancy.get('projectId', 'ERR'),
+        "projectType": projectTypeEmojis.get(vacancy.get('logoSrc', 'ERR').split('/')[-1].split('.')[0], ''),
+        "projectTags": ' '.join([projectTagsEmojis.get(tag if isinstance(tag, str) else tag.get('value', ''), '') for tag in vacancy.get('projectOfficeTags', []) if (tag if isinstance(tag, str) else tag.get('value', '')) in projectTagsEmojis]), # TODO: refactor
     }
 
     if values["role"] and isinstance(values["role"], str) and values["role"][0].isalpha():
@@ -29,3 +48,4 @@ def new_vacancy_message(vacancy):
         template = f.read()
 
     return template.format(**values)
+

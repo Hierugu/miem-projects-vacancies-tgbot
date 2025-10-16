@@ -1,18 +1,14 @@
 from telegram.ext import ContextTypes
 from telegram import Update
-from main import logger
+from logger import logger
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет! Я бот вакансий проектов МИЭМ. Ты можешь подписаться на обновления и я буду сообщать тебе о новых вакансиях!")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Доступные команды:\n"
-        "/start - Запустить бота\n"
-        "/help - Помощь\n"
-        "/subscribe - Подписаться на обновления\n"
-        "/unsubscribe - Отписаться от обновлений"
-    )
+    with open("messageTemplates/helpMessage.md", "r", encoding="utf-8") as f:
+        help_text = f.read()
+    await update.message.reply_text(help_text)
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user

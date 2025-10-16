@@ -1,16 +1,10 @@
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
 from dotenv import load_dotenv
-import os, logging
+import os
 
 from handlers import start, help_command, echo, subscribe, unsubscribe, statistics
 from jobs import notify_new_vacancies_task
-
-# Enable logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.WARNING
-)
-logger = logging.getLogger(__name__)
+from logger import logger
 
 def main():
 

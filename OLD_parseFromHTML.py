@@ -1,3 +1,7 @@
+import re
+import json
+
+
 def get_data_from_response(res):
     # with open("out.html", "w", encoding="utf-8") as f:
     #     f.write(res)
