@@ -15,8 +15,6 @@ projectTagsEmojis = {
     "ТехноШоу": "🤖",
 }
 
-
-
 def escape_markdown_v2(text):
     if not isinstance(text, str):
         return text
@@ -24,7 +22,7 @@ def escape_markdown_v2(text):
     return ''.join(['\\' + c if c in escape_chars else c for c in text])
 
 def new_vacancy_message(vacancy):
-    values = { # TODO: add project type as emoji - ⚙️, 🖥️, 📚, ⚛️, 💼 | 🏢, 💰
+    values = {
         "id": vacancy.get('id', 'ERR'),
         "role": vacancy.get('role', 'ERR'),
         "description": vacancy.get('description', 'ERR').strip(),
