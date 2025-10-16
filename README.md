@@ -1,5 +1,4 @@
-#
-
+# Бот вакансий
 
 ## API (Server Actions IDs)
 ### Get vacancies for /vacancies
@@ -18,6 +17,15 @@
 ```
 1:{"id":"7f7e4f22059cd6a98c1e68b7755c2b80df1f32c90b","bound":null}
 0:["$F1",{}]
+```
+## Bot command tip
+```
+start - Start the bot and get a welcome message
+help - Show help information
+subscribe - Subscribe to new vacancies updates
+unsubscribe - Unsubscribe from vacancies updates
+statistics - Show statistics about active vacancies
+random - Get a random vacancy
 ```
 
 

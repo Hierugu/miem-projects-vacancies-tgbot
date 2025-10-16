@@ -1,6 +1,9 @@
 from telegram.ext import ContextTypes
 from telegram import Update
 from logger import logger
+import api
+import messages
+import random as rand
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -59,4 +62,22 @@ async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def statistics(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     logger.warning(f"User {user.id} ({user.username}) called /statistics")
-    pass
+
+    json_data = api.call_get_vacancies_api(offset=0, limit=10000)
+
+    msg = messages.new_statistics_message(json_data)
+    await update.message.reply_text(msg)
+
+async def random(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    logger.warning(f"User {user.id} ({user.username}) called /random")
+
+    json_data = api.call_get_vacancies_api(offset=0, limit=10000)
+    vacancies = json_data.get("vacancies", [])
+    if not vacancies:
+        await update.message.reply_text("Нет доступных вакансий.")
+        return
+
+    vacancy = rand.choice(vacancies)
+    msg = messages.new_vacancy_message(vacancy)
+    await update.message.reply_text(msg, parse_mode="MarkdownV2", disable_web_page_preview=True)
