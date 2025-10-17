@@ -5,11 +5,20 @@ import os
 from handlers import random, start, help_command, echo, subscribe, unsubscribe, statistics, filter
 from jobs import notify_new_vacancies_task
 from logger import logger
+import db
 
 def main():
 
     load_dotenv()
     TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN")
+    # Initialize DB if it's not initialized yet
+    try:
+        if not db.is_initialized():
+            logger.warning("DB not initialized, running init_db()")
+            db.init_db()
+    except Exception as e:
+        logger.error(f"Failed to check/init DB: {e}")
+        # proceed; DB errors will surface later when used
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))

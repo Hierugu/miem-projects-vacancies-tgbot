@@ -4,6 +4,7 @@ from logger import logger
 import api
 import messages
 import random as rand
+import db
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -20,44 +21,48 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     logger.warning(f"User {user.id} ({user.username}) sent message: {update.message.text}")
-    # await update.message.reply_text(update.message.text)
+    # If the user is expected to send a filter, save next message as filter
+    if context.user_data.get('expecting_filter'):
+        filter_text = update.message.text.strip()
+        try:
+            db.set_filter(user.id, filter_text)
+        except Exception as e:
+            logger.warning(f"Failed to save filter for user {user.id}: {e}")
+            await update.message.reply_text("Не удалось сохранить фильтр. Попробуйте позже.")
+            context.user_data['expecting_filter'] = False
+            return
+
+        context.user_data['expecting_filter'] = False
+        logger.warning(f"User {user.id} ({user.username}) set filter: {filter_text}")
+        await update.message.reply_text("Фильтр сохранён.")
+        return
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     logger.warning(f"User {user.id} ({user.username}) called /subscribe")
+    # Add user to DB
     try:
-        with open("users.txt", "r") as f:
-            users = [u.strip() for u in f.readlines() if u.strip()]
-    except FileNotFoundError:
-        users = []
+        db.add_user(user.id, user.username)
+    except Exception as e:
+        logger.warning(f"Failed to add user {user.id}: {e}")
+        await update.message.reply_text("Не удалось подписать вас на рассылку. Попробуйте позже.")
+        return
 
-    if str(user.id) in users:
-        await update.message.reply_text("Вы уже подписаны на обновления.")
-        logger.warning(f"User {user.username} ({user.id}) tried to subscribe again.")
-    else:
-        with open("users.txt", "a") as f:
-            f.write(f"{user.id}\n")
-        logger.warning(f"User {user.username} ({user.id}) subscribed.")
-        await update.message.reply_text("Вы подписались на обновления о новых вакансиях!")
+    logger.warning(f"User {user.username} ({user.id}) subscribed.")
+    await update.message.reply_text("Вы подписались на обновления о новых вакансиях!")
 
 async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     logger.warning(f"User {user.id} ({user.username}) called /unsubscribe")
     try:
-        with open("users.txt", "r") as f:
-            users = f.readlines()
-        users = [u.strip() for u in users if u.strip()]
-        if str(user.id) not in users:
-            await update.message.reply_text("Вы не были подписаны.")
-        else:
-            users = [u for u in users if u != str(user.id)]
-            with open("users.txt", "w") as f:
-                for u in users:
-                    f.write(f"{u}\n")
-        logger.warning(f"User {user.username} ({user.id}) unsubscribed.")
-        await update.message.reply_text("Вы отписались от обновлений о вакансиях.")
-    except FileNotFoundError:
-        await update.message.reply_text("Внутренняя ошибка: база пользователей не найдена.")
+        db.remove_user(user.id)
+    except Exception as e:
+        logger.warning(f"Failed to remove user {user.id}: {e}")
+        await update.message.reply_text("Не удалось отписать вас. Попробуйте позже.")
+        return
+
+    logger.warning(f"User {user.username} ({user.id}) unsubscribed.")
+    await update.message.reply_text("Вы отписались от обновлений о вакансиях.")
 
 async def statistics(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -85,4 +90,15 @@ async def random(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def filter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     logger.warning(f"User {user.id} ({user.username}) called /filter")
-    await update.message.reply_text("Функция фильтрации пока не реализована.")
+    try:
+        current = db.get_filter(user.id)
+    except Exception as e:
+        logger.warning(f"Failed to read filter for user {user.id}: {e}")
+        current = None
+
+    if current:
+        await update.message.reply_text(f"Ваш текущий фильтр: {current}\nОтправьте новый фильтр — следующая строка будет сохранена.")
+    else:
+        await update.message.reply_text("Отправьте фильтр — следующая строка будет сохранена как ваш фильтр.")
+
+    context.user_data['expecting_filter'] = True
